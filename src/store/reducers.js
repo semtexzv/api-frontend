@@ -2,7 +2,14 @@ import { applyReducerHash } from '@redhat-cloud-services/frontend-components-uti
 import * as ACTIONS from './actionTypes';
 
 const defaultState = { loaded: false, selectedRows: {}};
-const disabledApis = [ 'aiops-insights-clustering', 'openshift', 'ruledev', 'migration-analytics', 'subscriptions' ];
+const disabledApis = [
+    'automation-analytics',
+    'aiops-insights-clustering',
+    'openshift',
+    'ruledev',
+    'migration-analytics',
+    'subscriptions'
+];
 
 function dataLoaded(state, { payload }) {
     return {
