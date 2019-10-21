@@ -135,7 +135,7 @@ export function multiDownload(selectedRows = {}, onError) {
             const { name, ...file } = files[0] || {};
             if (name) {
                 delete file.latest;
-                fileDownload(file, `${name}-openapi.json`);
+                fileDownload(JSON.stringify(file), `${name}-openapi.json`);
             }
         }
     });
