@@ -105,7 +105,7 @@ export function downloadFile(appName, appVersion) {
     .then(data => {
         delete data.latest;
         delete data.name;
-        fileDownload(data, `${appName}-openapi.json`);
+        fileDownload(JSON.stringify(data), `${appName}-openapi.json`);
     });
 }
 
