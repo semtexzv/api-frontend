@@ -9,7 +9,7 @@
     "@patternfly/react-table": "^2.20.15",
     "@redhat-cloud-services/frontend-components": "0.0.18",
     "@redhat-cloud-services/frontend-components-notifications": "0.0.7",
-    "@redhat-cloud-services/frontend-components-utilities": "0.0.9",
+    "@redhat-cloud-services/frontend-components-utilities": "0.0.10",
     "classnames": "^2.2.5",
     "js-file-download": "^0.4.7",
     "js-yaml": "^3.13.1",
