@@ -6,20 +6,22 @@ import {
     PageHeaderTitle,
     Main,
     SkeletonTable,
-    TableToolbar
+    TableToolbar,
+    PrimaryToolbar
 } from '@redhat-cloud-services/frontend-components';
-import {
-    Pagination,
-    Level,
-    LevelItem,
-    Button
-} from '@patternfly/react-core';
+import { Pagination } from '@patternfly/react-core';
 import { Table, TableHeader, TableBody, TableVariant } from '@patternfly/react-table';
 import { connect } from 'react-redux';
 import { onLoadApis, onSelectRow } from '../store/actions';
-import { SimpleTableFilter } from '@redhat-cloud-services/frontend-components';
 import { filterRows, buildRows, columns, multiDownload } from '../Utilities/overviewRows';
 import { addNotification } from '@redhat-cloud-services/frontend-components-notifications';
+
+const isNotSelected = ({ selectedRows }) => {
+    return !selectedRows ||
+        Object.values(selectedRows || {})
+        .map(({ isSelected }) => isSelected)
+        .filter(Boolean).length === 0;
+};
 
 const Overview = ({ loadApis, services, history, selectRow, onError }) => {
     useEffect(() => {
@@ -42,57 +44,64 @@ const Overview = ({ loadApis, services, history, selectRow, onError }) => {
             </PageHeader>
             <Main className="ins-c-docs__api">
                 <React.Fragment>
-                    <TableToolbar>
-                        {
-                            services.loaded ?
-                                <Level className="ins-c-docs__api-overview-toolbar">
-                                    <LevelItem>
-                                        <Level>
-                                            <LevelItem>
-                                                <SimpleTableFilter
-                                                    onFilterChange={ (value) => {
-                                                        onPaginate({
-                                                            ...pageSettings,
-                                                            page: 1
-                                                        });
-                                                        onChangeFilter(value);
-                                                    } }
-                                                    buttonTitle={ null }
-                                                />
-                                            </LevelItem>
-                                            <LevelItem>
-                                                <Button
-                                                    isDisabled={ !services.selectedRows ||
-                                                        Object.values(services.selectedRows || {})
-                                                        .map(({ isSelected }) => isSelected)
-                                                        .filter(Boolean).length === 0 }
-                                                    onClick={ () => multiDownload(services.selectedRows, onError) }
-                                                    className="ins-c-api__download--selected"
-                                                >
-                                                    Download Selected
-                                                </Button>
-                                            </LevelItem>
-                                        </Level>
-                                    </LevelItem>
-                                    <LevelItem>
-                                        <Pagination
-                                            itemCount={ (filtered || services.endpoints).length }
-                                            perPage={ pageSettings.perPage }
-                                            page={ pageSettings.page }
-                                            onSetPage={ (_e, page) => onPaginate({
-                                                ...pageSettings,
-                                                page
-                                            }) }
-                                            onPerPageSelect={ (_event, perPage) => onPaginate({
-                                                ...pageSettings,
-                                                perPage
-                                            }) }
-                                        />
-                                    </LevelItem>
-                                </Level> :
-                                `loading`
+                    <PrimaryToolbar
+                        filterConfig={ {
+                            items: [{
+                                label: 'Filter by text',
+                                type: 'text',
+                                filterValues: {
+                                    id: 'filter-by-string',
+                                    key: 'filter-by-string',
+                                    placeholder: 'Filter by text',
+                                    value: filter,
+                                    onChange: (_e, value) => {
+                                        onPaginate({
+                                            ...pageSettings,
+                                            page: 1
+                                        });
+                                        onChangeFilter(value);
+                                    },
+                                    isDisabled: !services.loaded
+                                }
+                            }]
+                        } }
+                        actionsConfig={ {
+                            actions: [{
+                                label: 'Download Selected',
+                                props: {
+                                    isDisabled: isNotSelected(services),
+                                    onClick: () => multiDownload(services.selectedRows, onError)
+                                }
+                            }]
+                        } }
+                        { ...services.loaded && {
+                            pagination: {
+                                ...pageSettings,
+                                itemCount: (filtered || services.endpoints).length,
+                                onSetPage: (_e, page) => onPaginate({
+                                    ...pageSettings,
+                                    page
+                                }),
+                                onPerPageSelect: (_event, perPage) => onPaginate({
+                                    ...pageSettings,
+                                    perPage
+                                })
+                            }}
                         }
-                    </TableToolbar>
+                        { ...filter.length > 0 && { activeFiltersConfig: {
+                            filters: [{
+                                name: filter
+                            }],
+                            onDelete: () => {
+                                onPaginate({
+                                    ...pageSettings,
+                                    page: 1
+                                });
+                                onChangeFilter('');
+                            }
+                        }}
+                        }
+                    />
                     {
                         services.loaded ?
                             <Table
@@ -102,13 +111,15 @@ const Overview = ({ loadApis, services, history, selectRow, onError }) => {
                                 onSort={ (_e, index, direction) => onSortBy({ index, direction }) }
                                 cells={ columns }
                                 rows={ rows }
-                                onSelect={ (_e, isSelected, rowKey) => {
-                                    if (rowKey === -1) {
-                                        selectRow(isSelected, rows);
-                                    } else {
-                                        selectRow(isSelected, rows[rowKey]);
+                                { ...(filtered || services.endpoints).length > 0 && ({
+                                    onSelect: (_e, isSelected, rowKey) => {
+                                        if (rowKey === -1) {
+                                            selectRow(isSelected, rows);
+                                        } else {
+                                            selectRow(isSelected, rows[rowKey]);
+                                        }
                                     }
-                                } }
+                                }) }
                             >
                                 <TableHeader />
                                 <TableBody onRowClick={ (event, data) => {
