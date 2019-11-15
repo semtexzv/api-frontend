@@ -25,6 +25,10 @@ export const oneApi = ({ name, version = 'v1' }) => {
     return instance.get(url).then(data => ({
         ...data,
         latest: url,
-        name
+        name,
+        servers: [
+            ...data.servers || [],
+            { url: `/api/${name}/${version}`, description: 'current environment' }
+        ].filter((server, key, array) => array.findIndex(({ url }) => server.url.indexOf(url) !== -1) === key)
     }));
 };
