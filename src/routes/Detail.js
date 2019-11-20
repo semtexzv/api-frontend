@@ -87,7 +87,24 @@ const Detail = ({ loadApi, detail, match }) => {
                     <Card>
                         <CardBody>
                             { detail.loaded &&
-                                <SwaggerUI spec={ detail.spec } />
+                                <SwaggerUI
+                                    deepLinking
+                                    docExpansion="list"
+                                    spec={ detail.spec }
+                                    onComplete={ () => {
+                                        if (location.hash && location.hash.length > 0) {
+                                            const found = document
+                                            .querySelector(`[id$='${location.hash.replace('#', '').replace(/\\./g, '\\\\.')}']`);
+                                            if (found) {
+                                                found.scrollIntoView();
+                                                found.children[0].dispatchEvent(new MouseEvent('click', {
+                                                    view: window,
+                                                    bubbles: true,
+                                                    cancelable: false
+                                                }));
+                                            }
+                                        }
+                                    } } />
                             }
                             { !detail.loaded &&
                                 <Facebook />
