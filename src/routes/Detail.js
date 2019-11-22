@@ -91,17 +91,19 @@ const Detail = ({ loadApi, detail, match }) => {
                                     deepLinking
                                     docExpansion="list"
                                     spec={ detail.spec }
-                                    onComplete={ () => {
+                                    onComplete={ (system) => {
+                                        const { layoutActions: { show }} = system;
+                                        system.layoutActions.show = (isShownKey, isShown) => {
+                                            history.replaceState({}, '', `${location.pathname}#${CSS.escape(isShownKey.join('-'))}`);
+                                            show(isShownKey, isShown);
+                                        };
+
                                         if (location.hash && location.hash.length > 0) {
                                             const found = document
                                             .querySelector(`[id$='${location.hash.replace('#', '').replace(/\\./g, '\\\\.')}']`);
                                             if (found) {
                                                 found.scrollIntoView();
-                                                found.children[0].dispatchEvent(new MouseEvent('click', {
-                                                    view: window,
-                                                    bubbles: true,
-                                                    cancelable: false
-                                                }));
+                                                show(location.hash.replace('#', '').replace(/\\/g, '').split('-'), true);
                                             }
                                         }
                                     } } />
