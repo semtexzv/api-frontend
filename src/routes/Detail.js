@@ -117,7 +117,7 @@ const Detail = ({ loadApi, detail, match }) => {
             </Main>
             <Modal
                 width={ '50%' }
-                title="Modal Header"
+                title="Spec JSON"
                 isOpen={ isOpen }
                 onClose={ () => onModalToggle(false) }
                 actions={ [
